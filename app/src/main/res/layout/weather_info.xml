@@ -62,7 +62,7 @@
         <RelativeLayout
             android:id="@+id/weather_today"
 
-            android:layout_width="fill_parent"
+           android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:padding="10.0dip" >
             <!-- 城市名称 -->
@@ -161,7 +161,7 @@
                     android:gravity="center"
                     android:singleLine="true"
                     android:text="重度污染"
-                    android:textColor="@android:color/white"
+                    android:textColor="@android:color/holo_green_light"
                     android:textSize="20.0sp" />
             </LinearLayout>
             <!-- 今日天气信息块 -->
