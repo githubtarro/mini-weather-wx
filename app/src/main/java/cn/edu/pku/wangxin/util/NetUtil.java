@@ -1,4 +1,4 @@
-package cn.edu.pku.zhangqixun.util;
+package cn.edu.pku.wangxin.util;
 
 /**
  * Created by Administrator_x on 2016/9/27.
@@ -15,8 +15,7 @@ public class NetUtil {
     public static final int NETWORN_MOBILE = 2;
     public static int getNetworkState(Context context) {
         ConnectivityManager connManager = (ConnectivityManager)
-                context
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
         if (networkInfo == null) {
             return NETWORN_NONE;

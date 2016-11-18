@@ -1,4 +1,4 @@
-package cn.edu.pku.zhangqixun.bean;
+package cn.edu.pku.wangxin.bean;
 
 /**
  * Created by Administrator_x on 2016/10/11.

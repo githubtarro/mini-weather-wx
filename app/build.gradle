@@ -5,7 +5,7 @@ android {
     buildToolsVersion "24.0.2"
 
     defaultConfig {
-        applicationId "com.example.administrator_x.myapplication_real"
+        applicationId "cn.edu.pku.wangxin.miniweather"
         minSdkVersion 15
         targetSdkVersion 24
         versionCode 1
