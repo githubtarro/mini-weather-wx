@@ -38,9 +38,9 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     private static final int UPDATE_LISTVIEW = 1;
     private ImageView mBackBtn;
     private List<City> mCityList;
-    private List<String> strCityName=new ArrayList<>();
-    private List<String> strCityNumber=new ArrayList<>();
-    private List<String> strCityInfo=new ArrayList<>();
+    /*private List<String> strCityName=new ArrayList<>();
+    private List<String> strCityNumber=new ArrayList<>();*/
+    private static List<String> strCityInfo=new ArrayList<>();
     private String selectedCityID;
     private MyApplication app;
 
@@ -48,9 +48,11 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     private EditText mEditText;
     private ArrayAdapter<String> adapter;
 
-    List<String> strCityInfo_full=new ArrayList<>();
-    List<String> strCityInfo_full_pinyin=new ArrayList<>();
+    private static List<String> strCityInfo_full=new ArrayList<>();
+    private static  List<String> strCityInfo_full_pinyin=new ArrayList<>();
     private Editable editableTemp;
+    private static int once=0;
+    private ListView list_view;
 
 
     @Override
@@ -66,25 +68,33 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
 
 
         //注意是MyApplication类型，而不能是Application类型，否则下面getCityList方法会找不到
-        app = (MyApplication) getApplicationContext();
-        mCityList = app.getCityList();
-        int cnt=0;
-        for(City city:mCityList)
-        {
-            strCityInfo.add("NO."+cnt+":"+city.getNumber()+"-"+city.getProvince()+"-"+ city.getCity());//这个则是保持匹配edittex中字符串的item的信息
-            strCityInfo_full.add("NO."+cnt+":"+city.getNumber()+"-"+city.getProvince()+"-"+ city.getCity()); //这个一直保持listview中所有item的字符串信息
-            strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
-            strCityName.add(city.getCity());
-            strCityNumber.add(city.getNumber());
-            cnt++;
-        }
+        /* 下面是个优化点，只让下面的初始化集合元素执行一次，否则每次点击“选择城市“功能，弹出选择城市都要卡顿好几秒。这样优化后，只有第一次进入慢，后面都快。
+        注意，要设置下面三个集合strCityInfo开头的都为private static 属性，如果不是static的话，只执行一遍，会导致下次进入的时候，listview就没内容了。因为没有
+        static就是局部变量，退出大括号后，变量中的内容释放。
+         */
+        if(once==0) {
+            once = 1;
+            app = (MyApplication) getApplicationContext();
+            mCityList = app.getCityList();
+            int cnt = 0;
+            for (City city : mCityList) {
+                strCityInfo.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity());//这个则是保持匹配edittex中字符串的item的信息
+                strCityInfo_full.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity()); //这个一直保持listview中所有item的字符串信息
+                strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
+                // strCityName.add(city.getCity());
+                //strCityNumber.add(city.getNumber());
+                cnt++;
+            }
 
-        ListView list_view = (ListView) findViewById(R.id.list_view);
-        //第三个参数类型变了，则ArrayAdapter
-        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,strCityInfo);
-        //后面的泛型也要相应改变
-        list_view.setAdapter(adapter);
-        list_view.setOnItemClickListener(this);
+        }
+            list_view = (ListView) findViewById(R.id.list_view);
+            //第三个参数类型变了，则ArrayAdapter
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, strCityInfo);
+            //后面的泛型也要相应改变
+            list_view.setAdapter(adapter);
+            list_view.setOnItemClickListener(this);
+
+
 
 
         mEditText.addTextChangedListener(new TextWatcher() {
@@ -159,8 +169,11 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(SelectCity.this, "你选择了:"+strCityName.get(position), Toast.LENGTH_SHORT).show();
-        selectedCityID=strCityNumber.get(position);
+        Toast.makeText(SelectCity.this, "你选择了:"+strCityInfo.get(position), Toast.LENGTH_SHORT).show();
+        String[] a=strCityInfo.get(position).split(":");  //因为listview中每个item是NO.xxx:城市Number-省份-城市
+        String[] b=a[1].split("-");
+        selectedCityID=b[0];
+        Log.d("selectedCityID",b[0]);
 
         Intent i = new Intent();  //注意不是用getIntent获取intent，因为当前活动不是要从mainactivity创建的Intent中获取什么数据。毕竟mainactvitiy中的intent也没有
         //putExtra操作。 恰恰是当前activity要创建intent并写入东西，传递给mainactivity

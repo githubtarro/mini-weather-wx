@@ -9,6 +9,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,14 +51,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 default:
                     break;
             }
+            //上面都执行完了才是整个界面更新完毕，才执行下面的
+             title_update_progress.setVisibility(View.GONE);
+            mUpdateBtn.setVisibility(View.VISIBLE);  //
+
         }
     };
+    private ProgressBar title_update_progress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_info);
-        mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
+        mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);//更新按钮
         mUpdateBtn.setOnClickListener(this);
+
+        title_update_progress = (ProgressBar) findViewById(R.id.title_update_progress); //更新按钮旋转控件 progressbar
+        title_update_progress.setVisibility(View.GONE);//初始化为看不见
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             Log.d("myWeather", "网络OK");
             Toast.makeText(MainActivity.this,"网络OK！", Toast.LENGTH_LONG).show();
@@ -108,17 +118,29 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
         if (view.getId() == R.id.title_update_btn){
+            view.setVisibility(View.GONE);  //一点击更新按钮(实则是imageview的onclick事件)，就使这个背景为静态图片的Imageview控件隐藏。
+            title_update_progress.setVisibility(View.VISIBLE);
+
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code","101040100"); //一般不会显示第二个参数代表城市天气，因为那是缺省值。
             Log.d("myWeather",cityCode);  //虽然上面那个config文件不存在，但是这里仍然能显示,因为cityCode是用的是上面getString的第二个参数作为缺省值。
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
-                queryWeatherCode(cityCode);  //这才是关键语句
+                queryWeatherCode(cityCode);  //这条语句中会调用子线程执行，子线程执行需要时间，但是这个函数在主线程中执行几乎不需要时间，所以马上就能看到下面Log输出我醒了
+
+                  //  Thread.sleep(8000); //这里不行是因为上面的控件setvisibility的生效相对于这条语句要慢。而这条语句一旦执行，整个界面要保持静止状态。
+
             }else
             {
                 Log.d("myWeather", "网络挂了");
                 Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
             }
+
+
+            Log.d("哈哈","我醒了"); //这条语句表明子线程sleep，但是这里没有sleep，即主线程没有sleep
+            //上面执行完毕不代表界面都把更新完的数据显示了，因为数据是从子线程传到主线程的handlmessage中的那个updateTodayweather方法
+           // title_update_progress.setVisibility(View.GONE);
+            //view.setVisibility(View.VISIBLE);  //不能放在上面if后面，否则else情况的话，即网络断的时候，就会一直转，而且网突然有了之后也不会回来
         }
     }
 
@@ -249,11 +271,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * @param cityCode
      */
     private void queryWeatherCode(String cityCode) {
+
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);  //输出上面的网址+城市编号
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 HttpURLConnection con=null;
                 TodayWeather todayWeather=null;
                 try{
@@ -285,6 +309,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         msg.what = UPDATE_TODAY_WEATHER;  //.what属性是一个数字，数字用宏定义来直观表明这个Message是携带什么东西
                         msg.obj=todayWeather;  //obj的值才是真正要传递的信息
                         mHandler.sendMessage(msg);
+
                     }
                 }catch (Exception e){
                     e.printStackTrace();

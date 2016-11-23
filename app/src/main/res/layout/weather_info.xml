@@ -32,6 +32,12 @@
             android:textColor="#ffffffff"
 
             android:textSize="22.0sp" />
+        <ProgressBar
+            android:id="@+id/title_update_progress"
+            style="@style/title_update_progressbar_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"/>
         <ImageView
             android:id="@+id/title_update_btn"
             android:layout_width="45.0dip"
