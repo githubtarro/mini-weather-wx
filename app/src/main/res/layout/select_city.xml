@@ -44,7 +44,7 @@
         <EditText
             android:id="@+id/search_edit"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="45dip"
             android:hint="搜索全国城市（中文）"
             android:layout_margin="10.0dip"
             android:drawableLeft="@drawable/magnifying_glass"
@@ -63,7 +63,6 @@
     </RelativeLayout>
     <TextView
         android:id="@+id/t"
-        android:text="@string/hello_world"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/rl_search"/>

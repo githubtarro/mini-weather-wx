@@ -19,6 +19,9 @@
         <activity android:name="cn.edu.pku.wangxin.miniweather.SelectCity">
 
         </activity>
+        <activity android:name="cn.edu.pku.wangxin.miniweather.Guide">
+
+        </activity>
 
     </application>
 

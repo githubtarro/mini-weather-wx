@@ -40,9 +40,9 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     private List<City> mCityList;
     /*private List<String> strCityName=new ArrayList<>();
     private List<String> strCityNumber=new ArrayList<>();*/
-    private static List<String> strCityInfo=new ArrayList<>();
+    private  List<String> strCityInfo=new ArrayList<>(); //没有 static
     private String selectedCityID;
-    private MyApplication app;
+    private  MyApplication app;
 
     private TextView mTextView;
     private EditText mEditText;
@@ -72,22 +72,29 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
         注意，要设置下面三个集合strCityInfo开头的都为private static 属性，如果不是static的话，只执行一遍，会导致下次进入的时候，listview就没内容了。因为没有
         static就是局部变量，退出大括号后，变量中的内容释放。
          */
-        if(once==0) {
-            once = 1;
-            app = (MyApplication) getApplicationContext();
-            mCityList = app.getCityList();
-            int cnt = 0;
-            for (City city : mCityList) {
-                strCityInfo.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity());//这个则是保持匹配edittex中字符串的item的信息
-                strCityInfo_full.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity()); //这个一直保持listview中所有item的字符串信息
-                strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
-                // strCityName.add(city.getCity());
-                //strCityNumber.add(city.getNumber());
-                cnt++;
-            }
-
+        //下面两行不能放在一次执行中，因为会影响下面第二个for循环
+        app = (MyApplication) getApplicationContext();
+        mCityList = app.getCityList();
+        if(once==0)
+        {
+                    once = 1;
+                    int cnt = 0;
+                    for (City city : mCityList) {
+                        // strCityInfo.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity());//这个则是保持匹配edittex中字符串的item的信息
+                        strCityInfo_full.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity()); //这个一直保持listview中所有item的字符串信息
+                        strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
+                        // strCityName.add(city.getCity());
+                        //strCityNumber.add(city.getNumber());
+                        cnt++;
+                    }
         }
-            list_view = (ListView) findViewById(R.id.list_view);
+        strCityInfo.clear();
+        int cnt=0;
+        for (City city : mCityList) {  //这里要保证 mCityList不是在上面的if(once)中
+            strCityInfo.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity());//没有这一句的话，则前面一次的搜索结果会作为下次进入城市选择界面的选项，这与当edittext为空时要全部选项不符
+            cnt++;
+        }
+           list_view = (ListView) findViewById(R.id.list_view);
             //第三个参数类型变了，则ArrayAdapter
             adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, strCityInfo);
             //后面的泛型也要相应改变
@@ -138,7 +145,6 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
                         for(String str2:strCityInfo_full_pinyin) {  //Trans2PinYin.trans2PinYin(str).indexOf(editableTemp.toString())!=-1 每次都转换会卡到不行，即使开线程也卡得不行
                             if (str2.indexOf(editable.toString()) != -1) {
                                 strCityInfo.add(strCityInfo_full.get(cnt2));
-
                             }
                             cnt2++;  //千万不要放在if中
                         }
@@ -151,7 +157,7 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.title_back:
+            case R.id.title_back:   //通过返回键返回的，表明没有选中选中某个item，此此时selectedcityID是空的，所以下面设置一个默认值，然后传回去。
                 Intent i = new Intent();  //注意不是用getIntent获取intent，因为当前活动不是要从mainactivity创建的Intent中获取什么数据。毕竟mainactvitiy中的intent也没有
                 //putExtra操作。 恰恰是当前activity要创建intent并写入东西，传递给mainactivity
                 if(selectedCityID==null) {
@@ -168,7 +174,7 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {   //优化了当点击某个item后，直接就返回mainactivity界面。
         Toast.makeText(SelectCity.this, "你选择了:"+strCityInfo.get(position), Toast.LENGTH_SHORT).show();
         String[] a=strCityInfo.get(position).split(":");  //因为listview中每个item是NO.xxx:城市Number-省份-城市
         String[] b=a[1].split("-");
