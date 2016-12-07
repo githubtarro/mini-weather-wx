@@ -7,6 +7,8 @@ import com.example.administrator_x.myapplication_real.R;
  */
 public class WeatherImage {
     public static int transToImage(String type){
+        if(type==null)       //防止type=null的时候，下面没有一个成立会崩溃。 即使下面有default
+            return R.drawable.biz_plugin_weather_qing;
         switch (type) {
             case "小雨":
                 return R.drawable.biz_plugin_weather_xiaoyu;

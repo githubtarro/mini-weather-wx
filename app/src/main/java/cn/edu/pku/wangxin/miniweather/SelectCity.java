@@ -67,13 +67,13 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
         mCityList = app.getCityList();
         if(once==0)  //第一次进入城市选择界面的时候就把数据库中所有城市的必要信息加载进static成员变量中，并放在内存，方便后续的模糊查找
         {
-                    once = 1;
-                    int cnt = 0;
-                    for (City city : mCityList) {
-                        strCityInfo_full.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity()); //这个一直保持listview中所有item的字符串信息
-                        strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
-                        cnt++;
-                    }
+            once = 1;
+            int cnt = 0;
+            for (City city : mCityList) {
+                strCityInfo_full.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity()); //这个一直保持listview中所有item的字符串信息
+                strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
+                cnt++;
+            }
         }
         strCityInfo.clear();  //每次进入城市选择界面，都要先清空一下当前可选城市列表集合
         int cnt=0;

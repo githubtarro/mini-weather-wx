@@ -46,6 +46,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     private ImageView mCitySelect;
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
+    private String weatherAdvice;
 
     //UI线程处理从子线程传过来的更新UI的任务
     private Handler mHandler = new Handler() {
@@ -78,7 +79,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
    private TextView[] temperature_arr=new TextView[6];
     private TextView[] climate_arr=new TextView[6];
     private TextView[] wind_arr=new TextView[6];
-
+    private TextView mTv_advice;
 
 
     @Override
@@ -89,6 +90,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         mtitle_share = (ImageView) findViewById(R.id.title_share);
         mUpdateBtn.setOnClickListener(this);
 
+        mTv_advice = (TextView) findViewById(R.id.tv_advice);//温馨提示
+        mTv_advice.setOnClickListener(this);
         vp_6days = (ViewPager) findViewById(R.id.vp_6days);
 
         title_update_progress = (ProgressBar) findViewById(R.id.title_update_progress);
@@ -133,6 +136,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         temperatureTv.setText("N/A");
         climateTv.setText("N/A");
         windTv.setText("N/A");
+        mTv_advice.setText("");
 
         //得到最近6天天气信息控件的实例
         int[] tempArr1={R.id.week_today1,R.id.week_today2,R.id.week_today3};
@@ -211,6 +215,9 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                 Log.d("myWeather", "网络挂了");
                 Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
             }
+        }
+        if(view.getId()==R.id.tv_advice){
+            Toast.makeText(MainActivity.this,weatherAdvice,Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -318,7 +325,18 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                         eventType = xmlPullParser.next();
                         todayWeather.setType((typeCount+1)/2,xmlPullParser.getText());
                         typeCount++;
-                    }
+                    }else if (xmlPullParser.getName().equals("name") ) {
+                                eventType = xmlPullParser.next();
+                                if(xmlPullParser.getText().equals("运动指数")) {
+                                    eventType = xmlPullParser.next();
+                                    eventType = xmlPullParser.next();
+                                    eventType = xmlPullParser.next();
+                                    eventType = xmlPullParser.next();
+                                    eventType = xmlPullParser.next();
+                                    eventType = xmlPullParser.next();
+                                    todayWeather.setGuide(xmlPullParser.getText());
+                                }
+                            }
                 }
                 break;
 // 判断当前事件是否为标签元素结束事件
@@ -348,6 +366,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         climateTv.setText(todayWeather.getType(1));  //因为yesterday中有两个
         windTv.setText("风力:"+todayWeather.getFengli(1));
 
+        mTv_advice.setText("温馨提示(点击我)");
+        weatherAdvice=todayWeather.getGuide();
         weatherImg.setImageResource(WeatherImage.transToImage(todayWeather.getType(1)));
         pmImg.setImageResource(WeatherImage.transToImage_PM25(todayWeather.getPm25()));
 

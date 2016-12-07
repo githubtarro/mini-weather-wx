@@ -17,6 +17,16 @@ public class TodayWeather {
     private String[] low=new String[6];   //最低温
     private String[] type=new String[6];  //天气类型决定天气图片  在最近6天天气中决定两个控件
 
+    public String getGuide() {
+        return guide;
+    }
+
+    public void setGuide(String guide) {
+        this.guide = guide;
+    }
+
+    private String guide;
+
     public String getCity() {
         return city;
     }
