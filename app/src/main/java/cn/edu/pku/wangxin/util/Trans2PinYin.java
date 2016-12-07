@@ -157,6 +157,7 @@ public class Trans2PinYin {
         }
         return result;
     }
+
     /**
      * 转换一个或多个汉字
      *
@@ -182,6 +183,7 @@ public class Trans2PinYin {
         }
         return result;
     }
+
     public String getSelling(String chs) {
         String key, value;
         buffer = new StringBuilder();
@@ -211,6 +213,5 @@ public class Trans2PinYin {
     public static String trans2PinYin(String str) {
         return Trans2PinYin.getInstance().convertAll(str);
     }
-
 }
 

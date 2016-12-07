@@ -20,7 +20,7 @@ public class CityDB {
         db = context.openOrCreateDatabase(path, Context.MODE_PRIVATE, null);  //path就是/data/data/包名/databases/city.db。application对象中手握一个
         // 这个citydb对象的引用
     }
-    public List<City> getAllCity() {  //这个方法返回一个list链表，里面存储所有的city对象。
+    public List<City> getAllCity() {  //该方法返回一个list链表，里面存储所有的city对象。
         List<City> list = new ArrayList<City>();
         Cursor c = db.rawQuery("SELECT * from " + CITY_TABLE_NAME, null);
         while (c.moveToNext()) {
@@ -31,7 +31,7 @@ public class CityDB {
             String allFirstPY = c.getString(c.getColumnIndex("allfirstpy"));
             String firstPY = c.getString(c.getColumnIndex("firstpy"));
             City item = new City(province, city, number, firstPY,allPY,allFirstPY);
-            list.add(item);  //所以list这个集合类型对象中存储的每个元素都是个City对象
+            list.add(item); 
         }
         return list;
     }

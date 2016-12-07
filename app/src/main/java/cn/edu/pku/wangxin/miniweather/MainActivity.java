@@ -47,18 +47,19 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
 
+    //UI线程处理从子线程传过来的更新UI的任务
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
-                    updateTodayWeather((TodayWeather) msg.obj);  //函数作用是设置各个控件的text属性。使界面显示内容。
+                    updateTodayWeather((TodayWeather) msg.obj);
                     break;
                 default:
                     break;
             }
             //上面都执行完了才是整个界面更新完毕，才执行下面的
              title_update_progress.setVisibility(View.GONE);
-            mUpdateBtn.setVisibility(View.VISIBLE);  //
+            mUpdateBtn.setVisibility(View.VISIBLE);
 
         }
     };
@@ -84,13 +85,13 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_info);
-        mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);//更新按钮
-        mtitle_share = (ImageView) findViewById(R.id.title_share);  //得到更新按钮左边的按钮，因为他toleft更新按钮。
+        mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
+        mtitle_share = (ImageView) findViewById(R.id.title_share);
         mUpdateBtn.setOnClickListener(this);
 
         vp_6days = (ViewPager) findViewById(R.id.vp_6days);
 
-        title_update_progress = (ProgressBar) findViewById(R.id.title_update_progress); //更新按钮旋转控件 progressbar
+        title_update_progress = (ProgressBar) findViewById(R.id.title_update_progress);
         title_update_progress.setVisibility(View.GONE);//初始化为看不见
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             Log.d("myWeather", "网络OK");
@@ -108,6 +109,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         initView();
     }
 
+    //清空界面上各控件的信息
     void initView(){
         city_name_Tv = (TextView) findViewById(R.id.title_city_name);
         cityTv = (TextView) findViewById(R.id.city);
@@ -168,17 +170,18 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         }
     }
 
-    //实现最近6天信息的pagerview界面初始化
+    //实现最近6天天气信息的界面初始化
     private void init6day() {
         LayoutInflater inflater = LayoutInflater.from(this);
         views = new ArrayList<View>();
-        views.add(inflater.inflate(R.layout.weather_6day,null));//inflate()方法一般接收两个参数，第一个参数就是要加载的布局id，
+        views.add(inflater.inflate(R.layout.weather_6day,null));
         views.add(inflater.inflate(R.layout.weather_6day2,null));
         vpAdapter=new ViewPagerAdapter(views,this);
         vp= (ViewPager) findViewById(R.id.vp_6days);
         vp.setAdapter(vpAdapter);
-        vp.setOnPageChangeListener(this); //关键代码。设置监听器，就是传入一个实现那个监听功能的对象。一般都是拿activity对象。
+        vp.setOnPageChangeListener(this);
     }
+
 
     private void initDots(){
         dots=new ImageView[views.size()];
@@ -191,43 +194,38 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     public void onClick(View view) {
         if(view.getId()==R.id.title_city_manager){
             Intent i=new Intent(this,SelectCity.class);
-            startActivityForResult(i,1); //要求selectcity.java界面要返回一个城市ID信息。         则下面要重写onAcitivityResult方法
+            startActivityForResult(i,1); //要求selectcity.java界面要返回一个城市ID信息。下面要重写onAcitivityResult方法
         }
         if (view.getId() == R.id.title_update_btn){
-            view.setVisibility(View.GONE);  //一点击更新按钮(实则是imageview的onclick事件)，就使这个背景为静态图片的Imageview控件隐藏。
+            view.setVisibility(View.GONE);
             title_update_progress.setVisibility(View.VISIBLE);
 
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
-            String cityCode = sharedPreferences.getString("main_city_code","101040100"); //一般不会显示第二个参数代表城市天气，因为那是缺省值。
-            Log.d("myWeather",cityCode);  //虽然上面那个config文件不存在，但是这里仍然能显示,因为cityCode是用的是上面getString的第二个参数作为缺省值。
+            String cityCode = sharedPreferences.getString("main_city_code","101040100");
+            Log.d("myWeather",cityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
-                queryWeatherCode(cityCode);  //这条语句中会调用子线程执行，子线程执行需要时间，但是这个函数在主线程中执行几乎不需要时间，所以马上就能看到下面Log输出我醒了
-                  //  Thread.sleep(8000); //这里不行是因为上面的控件setvisibility的生效相对于这条语句要慢。而这条语句一旦执行，整个界面要保持静止状态。
+                queryWeatherCode(cityCode);
             }else
             {
                 Log.d("myWeather", "网络挂了");
                 Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
             }
-            Log.d("哈哈","我醒了"); //这条语句表明子线程sleep，但是这里没有sleep，即主线程没有sleep
-            //上面执行完毕不代表界面都把更新完的数据显示了，因为数据是从子线程传到主线程的handlmessage中的那个updateTodayweather方法
-           // title_update_progress.setVisibility(View.GONE);
-            //view.setVisibility(View.VISIBLE);  //不能放在上面if后面，否则else情况的话，即网络断的时候，就会一直转，而且网突然有了之后也不会回来
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) { //从select_city.java返回的信息，决定选择显示哪个城市
+    //从select_city.java返回的信息，决定选择显示哪个城市
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String newCityCode= data.getStringExtra("cityCode");
-            SharedPreferences.Editor sp = getSharedPreferences("config", MODE_PRIVATE).edit();  //将最近一次选择城市的天气信息暂存到sharedpreference中。
-            //注意上面的文件名不要写后缀，因为默认就是xml格式的。
-            sp.putString("main_city_code",newCityCode);
+            SharedPreferences.Editor sp = getSharedPreferences("config", MODE_PRIVATE).edit();
+            sp.putString("main_city_code",newCityCode);//将最近一次选择城市编码暂存到sharedpreference中。
             sp.commit();
 
             Log.d("myWeather", "选择的城市代码为"+newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
-                queryWeatherCode(newCityCode); //这个函数的作用是从网络中把xml数据拿下来，再经过pull解析时打印log信息
+                queryWeatherCode(newCityCode);
             } else {
                 Log.d("myWeather", "网络挂了");
                 Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
@@ -235,10 +233,11 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         }
     }
 
+    //用pull进行xml文件的解析，返回一个存储有选定城市天气信息的对象
     private TodayWeather parseXML(String xmldata){
         TodayWeather todayWeather = null;
         int fengxiangCount=0;
-        int fengliCount =1;  //每天的fengli有两个，白天，和夜晚
+        int fengliCount =1;
         int dateCount=1;
         int highCount =1;
         int lowCount=1;
@@ -246,7 +245,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         try {
             XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
             XmlPullParser xmlPullParser = fac.newPullParser();
-            xmlPullParser.setInput(new StringReader(xmldata)); //xmldata就是responseStr,即xml文件中的内容
+            xmlPullParser.setInput(new StringReader(xmldata));
             int eventType = xmlPullParser.getEventType();
             Log.d("myWeather", "parseXML");
             while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -288,7 +287,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                                 todayWeather.setFengli(0,xmlPullParser.getText());
                       } else if (xmlPullParser.getName().equals("fengli")) {
                         eventType = xmlPullParser.next();
-                        todayWeather.setFengli(fengliCount/2,xmlPullParser.getText()); //注意有11个fengli，不是10个，因为那个一开始有个总fengli,幸好用查找统计了一下
+                        todayWeather.setFengli(fengliCount/2,xmlPullParser.getText());
                         fengliCount++;
                     }else if (xmlPullParser.getName().equals("date_1") ) {
                                 eventType = xmlPullParser.next();
@@ -336,7 +335,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     }
     return todayWeather;
 }
-
+    //更新主界面选择的城市的天气信息
     void updateTodayWeather(TodayWeather todayWeather){
         city_name_Tv.setText(todayWeather.getCity()+"天气");
         cityTv.setText(todayWeather.getCity());
@@ -349,11 +348,11 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         climateTv.setText(todayWeather.getType(1));  //因为yesterday中有两个
         windTv.setText("风力:"+todayWeather.getFengli(1));
 
-        weatherImg.setImageResource(WeatherImage.transToImage(todayWeather.getType(1))); //定义一个WeatherImage类的静态方法transToIamge
+        weatherImg.setImageResource(WeatherImage.transToImage(todayWeather.getType(1)));
         pmImg.setImageResource(WeatherImage.transToImage_PM25(todayWeather.getPm25()));
 
-
-        for(int i=0;i<6;i++) {  //不要用.length方法，因为这是数组，不是容器，数组的大小不是里面有效元素的大小。
+        //显示近6天天气信息
+        for(int i=0;i<6;i++) {
             week_today_arr[i].setText(todayWeather.getDate(i));
             weather_img_ar[i].setImageResource(WeatherImage.transToImage(todayWeather.getType(i)));
             temperature_arr[i].setText(todayWeather.getHigh(i)+"~"+todayWeather.getLow(i));
@@ -363,10 +362,10 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
     }
 
+    //这个函数的作用是从网络中把xml数据拿下来
     private void queryWeatherCode(String cityCode) {
-
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
-        Log.d("myWeather", address);  //输出上面的网址+城市编号
+        Log.d("myWeather", address);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -380,26 +379,25 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                     con.setConnectTimeout(8000);
                     con.setReadTimeout(8000);
                     InputStream in = con.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in)); //BufferedReader (Reader  in)创建一个使用默认大小输入缓冲区
-                    // 的缓冲字符输入流。  InputStreamReader (InputStream  in)创建一个使用默认字符集的 InputStreamReader。
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                     StringBuilder response = new StringBuilder();
                     String str;
                     while((str=reader.readLine()) != null){
                         response.append(str);
-                        Log.d("myWeather", str);  //这一行行输出xml文件中的内容与下面一次性输出的效果是一样的
+                        Log.d("myWeather", str);
                     }
                     String responseStr=response.toString();
-                    Log.d("myWeather", responseStr);  //这是一次性输出xml文件中的内容与上面一行行输出的效果是一样的。
+                    Log.d("myWeather", responseStr);
 
-                    todayWeather=parseXML(responseStr);  //parseXML是对xml文件的内容进行pull解析。  todayWeather是个对象，里面已经写好toString方法。
+                    todayWeather=parseXML(responseStr);  //经过parseXML解析后返回一个拥有特定城市天气信息的对象
                     if(todayWeather!=null) {
-                        Log.d("myWeather", todayWeather.toString());  //将todayWeather对象的各个成员值输出来。
+                        Log.d("myWeather", todayWeather.toString());
 
+                        //子线程向UI线程传递消息
                         Message msg =new Message();
-                        msg.what = UPDATE_TODAY_WEATHER;  //.what属性是一个数字，数字用宏定义来直观表明这个Message是携带什么东西
-                        msg.obj=todayWeather;  //obj的值才是真正要传递的信息
+                        msg.what = UPDATE_TODAY_WEATHER;
+                        msg.obj=todayWeather;
                         mHandler.sendMessage(msg);
-
                     }
                 }catch (Exception e){
                     e.printStackTrace();
@@ -414,7 +412,6 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
@@ -426,6 +423,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                 dots[i].setImageResource(R.drawable.page_indicator_unfocused);
         }
     }
+
     @Override
     public void onPageScrollStateChanged(int state) {
 

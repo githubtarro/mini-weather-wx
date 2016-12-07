@@ -50,7 +50,7 @@ public class MyApplication extends Application {
     private boolean prepareCityList() {
         mCityList = mCityDB.getAllCity();  //mcitylist这个集合变量中每个元素都是个city对象。
         int i=0;
-        for (City city : mCityList) {  //这是是检验mcitylist中每个city对象是否已经有数据了。city对象有很多方法，下面只是输出两个做为测试。
+        for (City city : mCityList) {
             i++;
             String cityName = city.getCity();
             String cityCode = city.getNumber();
@@ -60,7 +60,7 @@ public class MyApplication extends Application {
         return true;
     }
     public List<City> getCityList() {
-        return mCityList;  //3.提供这个公有方法，能让其他外部组件得到 app的mCityList
+        return mCityList;  //3.提供这个公有方法，能让其他外部组件得到 MyApplication对象的mCityList属性
     }
 
     public static MyApplication getInstance(){
@@ -69,12 +69,12 @@ public class MyApplication extends Application {
 
     private CityDB openCityDB() {
         String path = "/data"
-                + Environment.getDataDirectory().getAbsolutePath()  //这个说白了返回的是"/data"
+                + Environment.getDataDirectory().getAbsolutePath()
                 + File.separator + getPackageName()
                 + File.separator + "databases1"
                 + File.separator
-                + CityDB.CITY_DB_NAME;  //其实就是CityDB类的静态成员CITY_DB_NAME="city.db"
-        File db = new File(path);  //path是city.db的绝对路径，与File类型的相关联
+                + CityDB.CITY_DB_NAME;
+        File db = new File(path);  //path是city.db的绝对路径，与与File类型的对象db相关联
         Log.d(TAG,path);
         if (!db.exists()) {  //如果File类对象db关联的city.db文件不存在的话
             String pathfolder = "/data"
