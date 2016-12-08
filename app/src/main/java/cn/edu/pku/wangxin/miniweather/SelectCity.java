@@ -5,6 +5,7 @@ package cn.edu.pku.wangxin.miniweather;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -54,6 +55,16 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     private Editable editableTemp;
     private ListView list_view;
 
+    private ProgressDialog pd;
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {// handler接收到消息后就会执行此方法
+
+
+
+            pd.dismiss();// 关闭ProgressDialog
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,28 +74,41 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
         mBackBtn.setOnClickListener(this);
         mEditText = (EditText) findViewById(R.id.search_edit);
         mTextView = (TextView)findViewById(R.id.t);
+
+        if(once==0) {
+            pd = ProgressDialog.show(SelectCity.this, "初次加载", "初始化城市列表，请稍后……"); //等子线程中耗时操作后，通过handler message方式来取消这个等待对话框
+        }
         app = (MyApplication) getApplicationContext();
         mCityList = app.getCityList();
-        if(once==0)  //第一次进入城市选择界面的时候就把数据库中所有城市的必要信息加载进static成员变量中，并放在内存，方便后续的模糊查找
-        {
-            once = 1;
-            int cnt = 0;
-            for (City city : mCityList) {
-                strCityInfo_full.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity()); //这个一直保持listview中所有item的字符串信息
-                strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
-                cnt++;
-            }
-        }
         strCityInfo.clear();  //每次进入城市选择界面，都要先清空一下当前可选城市列表集合
         int cnt=0;
         for (City city : mCityList) {
             strCityInfo.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity());
             cnt++;
         }
-           list_view = (ListView) findViewById(R.id.list_view);
-            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, strCityInfo);
-            list_view.setAdapter(adapter);
-            list_view.setOnItemClickListener(this);
+        list_view = (ListView) findViewById(R.id.list_view);
+        adapter = new ArrayAdapter<String>(SelectCity.this, android.R.layout.simple_list_item_1, strCityInfo);
+        list_view.setAdapter(adapter);
+        list_view.setOnItemClickListener(SelectCity.this);
+
+                /* 开启一个新线程，在新线程里执行耗时的方法 */
+            new Thread(new Runnable() {  //耗时操作放在子线程
+                @Override
+                public void run() {
+
+                    if (once == 0)  //第一次进入城市选择界面的时候就把数据库中所有城市的必要信息加载进static成员变量中，并放在内存，方便后续的模糊查找
+                    {
+                        once = 1;
+                        int cnt = 0;
+                        for (City city : mCityList) {
+                            strCityInfo_full.add("NO." + cnt + ":" + city.getNumber() + "-" + city.getProvince() + "-" + city.getCity()); //这个一直保持listview中所有item的字符串信息
+                            strCityInfo_full_pinyin.add(Trans2PinYin.trans2PinYin(strCityInfo_full.get(cnt)));
+                            cnt++;
+                        }
+                        handler.sendEmptyMessage(0);// 执行耗时的方法之后发送消给handler
+                    }
+                }
+            }).start();
 
 
         //EditText控件与ListView控件实现模糊查找
@@ -158,7 +182,7 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Toast.makeText(SelectCity.this, "你选择了:"+strCityInfo.get(position), Toast.LENGTH_SHORT).show();
-        String[] a=strCityInfo.get(position).split(":");  //因为listview中每个item的形式是NO.xxx:城市Number-省份-城市
+        String[] a=strCityInfo.get(position).split(":");  //因为listview中每个item的形式是NO.xxx:  城市Number   -省份-城市
         String[] b=a[1].split("-");
         selectedCityID=b[0];
         Log.d("selectedCityID",b[0]);

@@ -21,6 +21,16 @@ public class MyApplication extends Application {
     private static final String TAG="MyAPP";
     private static MyApplication mApplication;
 
+    public String getBaiduGPS() {
+        return baiduGPS;
+    }
+
+    private void setBaiduGPS(String baiduGPS) {
+        this.baiduGPS = baiduGPS;
+    }
+
+    private String baiduGPS;
+
     private CityDB mCityDB;  //手握一个数据库对象的引用
 
     private List<City> mCityList;  //这是得到数据库中的数据后，把每条记录（即每个城市）的信息存储在集合变量中。
@@ -62,6 +72,8 @@ public class MyApplication extends Application {
     public List<City> getCityList() {
         return mCityList;  //3.提供这个公有方法，能让其他外部组件得到 MyApplication对象的mCityList属性
     }
+
+
 
     public static MyApplication getInstance(){
         return mApplication;
