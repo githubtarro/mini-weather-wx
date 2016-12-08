@@ -23,6 +23,7 @@ public class TodayWeather {
 
     public void setGuide(String guide) {
         this.guide = guide;
+
     }
 
     private String guide;

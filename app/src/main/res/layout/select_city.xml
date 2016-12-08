@@ -44,7 +44,7 @@
         <EditText
             android:id="@+id/search_edit"
             android:layout_width="fill_parent"
-            android:layout_height="45dip"
+            android:layout_height="40dp"
             android:hint="搜索全国城市（中文）"
             android:layout_margin="10.0dip"
             android:drawableLeft="@drawable/magnifying_glass"
@@ -59,20 +59,146 @@
             android:textColorHint="#ffcccccc"
             android:textSize="15.0sp"
             />
+</RelativeLayout>
 
-    </RelativeLayout>
-    <TextView
+
+   <!-- <TextView
         android:id="@+id/t"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/rl_search"/>
+        android:layout_below="@id/rl_search"
+        android:text=""/>-->
+
+
+    <TextView
+        android:id="@+id/tv_biaoti"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rl_search"
+        android:text="热门城市"
+        android:gravity="center"
+        android:textColor="#ffffffff"
+        android:background="#0cbede"
+        android:textSize="15dp"
+        android:padding="5dp"/>
+        <LinearLayout
+            android:id="@+id/ll_popular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_biaoti"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_beijing"
+                android:text="北京"
+                android:textColor="#ff000000"
+                android:textSize="15dp"
+                android:padding="5dp"
+                android:layout_weight="1"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_shanghai"
+                android:text="上海"
+                android:textColor="#ff000000"
+                android:textSize="15dp"
+                android:padding="5dp"
+                android:layout_weight="1"
+                android:gravity="center"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_guangzhou"
+                android:text="广州"
+                android:textColor="#ff000000"
+                android:textSize="15dp"
+                android:padding="5dp"
+                android:layout_weight="1"
+                android:gravity="center"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_shenzhen"
+                android:text="深圳"
+                android:textColor="#ff000000"
+                android:textSize="15dp"
+                android:padding="5dp"
+                android:layout_weight="1"
+                android:gravity="center"/>
+        </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ll2_popular"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_popular"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_haikou"
+            android:text="海口"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            android:padding="5dp"
+            android:layout_weight="1"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_hangzhoui"
+            android:text="杭州"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            android:padding="5dp"
+            android:layout_weight="1"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_chongqing"
+            android:text="重庆"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            android:padding="5dp"
+            android:layout_weight="1"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_nanjing"
+            android:text="南京"
+            android:textColor="#ff000000"
+            android:textSize="15dp"
+            android:padding="5dp"
+            android:layout_weight="1"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_biaoti2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll2_popular"
+        android:text="城市列表"
+        android:gravity="center"
+        android:textColor="#ffffffff"
+        android:background="#0cbede"
+        android:textSize="15dp"
+        android:padding="5dp"/>
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/list_view"
-        android:layout_below="@id/rl_search">
+        android:layout_below="@id/tv_biaoti2">
 
     </ListView>
+
 
 
 </RelativeLayout>

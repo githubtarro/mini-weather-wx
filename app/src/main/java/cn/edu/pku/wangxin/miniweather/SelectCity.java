@@ -45,7 +45,7 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     private String selectedCityID;
     private  MyApplication app;
 
-    private TextView mTextView;
+   // private TextView mTextView;
     private EditText mEditText;
     private ArrayAdapter<String> adapter;
 
@@ -55,16 +55,29 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     private Editable editableTemp;
     private ListView list_view;
 
+
+
+
+
     private ProgressDialog pd;
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {// handler接收到消息后就会执行此方法
-
-
-
             pd.dismiss();// 关闭ProgressDialog
         }
     };
+
+    //热门城市
+    private TextView tv_beijing;
+    private TextView tv_shanghai;
+    private TextView tv_guangzhou;
+    private TextView tv_shenzhen;
+    private TextView tv_haikou;
+    private TextView tv_hangzhoui;
+    private TextView tv_chongqing;
+    private TextView tv_nanjing;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,10 +86,30 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
         mBackBtn  = (ImageView) findViewById(R.id.title_back);
         mBackBtn.setOnClickListener(this);
         mEditText = (EditText) findViewById(R.id.search_edit);
-        mTextView = (TextView)findViewById(R.id.t);
+        //mTextView = (TextView)findViewById(R.id.t);
+
+        //获取热门城市TextView控件并注册单击事件
+        tv_beijing = (TextView) findViewById(R.id.tv_beijing);
+        tv_shanghai = (TextView) findViewById(R.id.tv_shanghai);
+        tv_guangzhou = (TextView) findViewById(R.id.tv_guangzhou);
+        tv_shenzhen = (TextView) findViewById(R.id.tv_shenzhen);
+        tv_haikou = (TextView) findViewById(R.id.tv_haikou);
+        tv_hangzhoui = (TextView) findViewById(R.id.tv_hangzhoui);
+        tv_chongqing = (TextView) findViewById(R.id.tv_chongqing);
+        tv_nanjing = (TextView) findViewById(R.id.tv_nanjing);
+
+        tv_beijing.setOnClickListener(this);
+        tv_shanghai.setOnClickListener(this);
+        tv_guangzhou.setOnClickListener(this);
+        tv_shenzhen.setOnClickListener(this);
+        tv_haikou.setOnClickListener(this);
+        tv_hangzhoui.setOnClickListener(this);
+        tv_chongqing.setOnClickListener(this);
+        tv_nanjing.setOnClickListener(this);
+
 
         if(once==0) {
-            pd = ProgressDialog.show(SelectCity.this, "初次加载", "初始化城市列表，请稍后……"); //等子线程中耗时操作后，通过handler message方式来取消这个等待对话框
+            pd = ProgressDialog.show(SelectCity.this, "初次加载", "初始化城市列表，请稍候……"); //等子线程中耗时操作后，通过handler message方式来取消这个等待对话框
         }
         app = (MyApplication) getApplicationContext();
         mCityList = app.getCityList();
@@ -162,9 +195,9 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
 
     @Override
     public void onClick(View v) {
+        Intent i = new Intent();
         switch (v.getId()){ //如果点击返回键，表明不选中任何城市信息
             case R.id.title_back:
-                Intent i = new Intent();
                 if(selectedCityID==null) {
                     SharedPreferences sp = getSharedPreferences("config", MODE_PRIVATE);
                     selectedCityID=sp.getString("main_city_code","101040100");
@@ -172,6 +205,46 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
                 i.putExtra("cityCode", selectedCityID);
                 setResult(RESULT_OK, i); //向上一个活动返回数据的。
                 finish(); //由于当前活动是mainactivity通过startactivityforresult方法调用的，所以这个方法销毁之后会回调上一个活动的onActivityResult()方法。
+                break;
+            case R.id.tv_beijing:
+                i.putExtra("cityCode", "101010100");
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+            case R.id.tv_shanghai:
+                i.putExtra("cityCode", "101020100");
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+            case R.id.tv_guangzhou:
+                i.putExtra("cityCode", "101280101");
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+            case R.id.tv_shenzhen:
+                i.putExtra("cityCode", "101280601");
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+            case R.id.tv_haikou:
+                i.putExtra("cityCode", "101310101");
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+            case R.id.tv_hangzhoui:
+                i.putExtra("cityCode", "101210101");
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+            case R.id.tv_chongqing:
+                i.putExtra("cityCode", "101040100");
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+            case R.id.tv_nanjing:
+                i.putExtra("cityCode", "101190101");
+                setResult(RESULT_OK, i);
+                finish();
                 break;
             default:
                 break;
