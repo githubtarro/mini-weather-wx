@@ -1,12 +1,21 @@
 package cn.edu.pku.wangxin.miniweather;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
+import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +45,9 @@ import java.util.List;
 import cn.edu.pku.wangxin.app.MyApplication;
 import cn.edu.pku.wangxin.bean.City;
 import cn.edu.pku.wangxin.bean.TodayWeather;
+
+
+import cn.edu.pku.wangxin.service.AutoUpdateService;
 import cn.edu.pku.wangxin.util.NetUtil;
 import cn.edu.pku.wangxin.util.Trans2PinYin;
 import cn.edu.pku.wangxin.util.WeatherImage;
@@ -60,8 +72,9 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     private String weatherAdvice;
     public LocationClient mLocationClient = null;
     public BDLocationListener myListener = new MyLocationListener();
+
     //UI线程处理从子线程传过来的更新UI的任务
-    private Handler mHandler = new Handler() {
+   public  Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
@@ -94,8 +107,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     private TextView mTv_advice;
     private ImageView title_location;
     private TextView tv_testGPS;
-
-
+    private TextView temperature_current;
+    private AutoUpdateReceiver autoUpdateReceiver;
 
     class MyLocationListener implements BDLocationListener {
         @Override
@@ -210,7 +223,9 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         title_location.setOnClickListener(this);
         tv_testGPS = (TextView) findViewById(R.id.tv_testGPS);
 
+        //分享“按钮”
         mtitle_share = (ImageView) findViewById(R.id.title_share);
+        mtitle_share.setOnClickListener(this);
 
         mTv_advice = (TextView) findViewById(R.id.tv_advice);//温馨提示
         mTv_advice.setOnClickListener(this);
@@ -232,6 +247,24 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         init6day();
         initDots();
         initView();
+
+        //动态注册广播
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("Weather_CHANGED_ACTION");
+        autoUpdateReceiver = new AutoUpdateReceiver();
+        registerReceiver(autoUpdateReceiver,intentFilter);
+
+        Intent intent=new Intent("Weather_CHANGED_ACTION");
+        sendBroadcast(intent);
+
+        //startService(new Intent(this,AutoUpdateService.class));
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(new Intent(this,AutoUpdateService.class));
+        unregisterReceiver(autoUpdateReceiver);
+        super.onDestroy();
     }
 
     //清空界面上各控件的信息
@@ -240,6 +273,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         cityTv = (TextView) findViewById(R.id.city);
         timeTv = (TextView) findViewById(R.id.time);
         humidityTv = (TextView) findViewById(R.id.humidity);
+        temperature_current = (TextView) findViewById(R.id.temperature_current);
         weekTv = (TextView) findViewById(R.id.week_today);
         pmDataTv = (TextView) findViewById(R.id.pm_data);
         pmQualityTv = (TextView) findViewById(R.id.pm2_5_quality);
@@ -252,6 +286,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         cityTv.setText("N/A");
         timeTv.setText("N/A");
         humidityTv.setText("N/A");
+        temperature_current.setText("N/A");
         pmDataTv.setText("N/A");
         pmQualityTv.setText("N/A");
         weekTv.setText("N/A");
@@ -344,7 +379,14 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         if(view.getId()==R.id.title_location){     //单击定位“按钮”
             mLocationClient.start();
         }
-
+        if(view.getId()==R.id.title_share){
+            Intent intent=new Intent(Intent.ACTION_SEND);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Share");
+            intent.putExtra(Intent.EXTRA_TEXT, "I have successfully share my message through my app");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(Intent.createChooser(intent, getTitle()));
+        }
     }
 
     //从select_city.java返回的信息，决定选择显示哪个城市
@@ -485,6 +527,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         cityTv.setText(todayWeather.getCity());
         timeTv.setText(todayWeather.getUpdatetime()+ "发布");
         humidityTv.setText("湿度："+todayWeather.getShidu());
+        temperature_current.setText("温度："+todayWeather.getWendu()+"℃");
         pmDataTv.setText(todayWeather.getPm25());
         pmQualityTv.setText(todayWeather.getQuality());
         weekTv.setText(todayWeather.getDate(1));  //下标为1代表今天，下标为0代表昨天
@@ -509,7 +552,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     }
 
     //这个函数的作用是从网络中把xml数据拿下来
-    private void queryWeatherCode(String cityCode) {
+    public void queryWeatherCode(String cityCode) {
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);
         new Thread(new Runnable() {
@@ -591,6 +634,27 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         option.SetIgnoreCacheException(false);//可选，默认false，设置是否收集CRASH信息，默认收集
         option.setEnableSimulateGps(false);//可选，默认false，设置是否需要过滤GPS仿真结果，默认需要
         mLocationClient.setLocOption(option);
+    }
+
+    public class AutoUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(MainActivity.this, "后台天气自动更新中……", Toast.LENGTH_SHORT).show();
+            Log.d("Receiver","haha");
+            SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+            String cityCode = sharedPreferences.getString("main_city_code","101040100");
+            Log.d("myWeather",cityCode);
+            if (NetUtil.getNetworkState(MainActivity.this) != NetUtil.NETWORN_NONE) {
+                Log.d("myWeather", "网络OK");
+                queryWeatherCode(cityCode);
+            }else
+            {
+                Log.d("myWeather", "网络挂了");
+                Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
+            }
+            Intent i=new Intent(context, AutoUpdateService.class);
+            context.startService(i); //会调用service的onStartCommand方法，再设置定时器。
+        }
     }
 }
 

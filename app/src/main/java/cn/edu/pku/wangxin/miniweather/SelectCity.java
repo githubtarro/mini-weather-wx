@@ -55,10 +55,6 @@ public class SelectCity extends Activity implements View.OnClickListener,Adapter
     private Editable editableTemp;
     private ListView list_view;
 
-
-
-
-
     private ProgressDialog pd;
     Handler handler = new Handler() {
         @Override
