@@ -22,7 +22,7 @@ public  class AutoUpdateService extends Service {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(20000);
+                    Thread.sleep(120000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

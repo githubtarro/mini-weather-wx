@@ -109,6 +109,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     private TextView tv_testGPS;
     private TextView temperature_current;
     private AutoUpdateReceiver autoUpdateReceiver;
+    private TodayWeather todayWeather;
 
     class MyLocationListener implements BDLocationListener {
         @Override
@@ -383,7 +384,14 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
             Intent intent=new Intent(Intent.ACTION_SEND);
             intent.setType("image/*");
             intent.putExtra(Intent.EXTRA_SUBJECT, "Share");
-            intent.putExtra(Intent.EXTRA_TEXT, "I have successfully share my message through my app");
+            //添加分享的城市信息
+            StringBuilder shareCityInfo=new StringBuilder();
+            shareCityInfo.append(todayWeather.getCity());
+            shareCityInfo.append("  "+"天气状况："+todayWeather.getType(0));
+            shareCityInfo.append("  "+"温度："+todayWeather.getWendu()+"℃");
+            shareCityInfo.append("  "+"湿度："+todayWeather.getShidu());
+
+            intent.putExtra(Intent.EXTRA_TEXT, shareCityInfo.toString());
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(Intent.createChooser(intent, getTitle()));
         }
@@ -410,7 +418,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
 
     //用pull进行xml文件的解析，返回一个存储有选定城市天气信息的对象
     private TodayWeather parseXML(String xmldata){
-        TodayWeather todayWeather = null;
+        todayWeather = null;
         int fengxiangCount=0;
         int fengliCount =1;
         int dateCount=1;
@@ -430,9 +438,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                         break;
 // 判断当前事件是否为标签元素开始事件
                     case XmlPullParser.START_TAG:
-                        if(xmlPullParser.getName().equals("resp"
-                        )){
-                            todayWeather= new TodayWeather();
+                        if(xmlPullParser.getName().equals("resp")){
+                            todayWeather = new TodayWeather();
                         }
                         if (todayWeather != null) {
                             if (xmlPullParser.getName().equals("city")) {

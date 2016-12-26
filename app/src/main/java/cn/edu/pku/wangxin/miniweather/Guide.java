@@ -37,7 +37,7 @@ public class Guide extends Activity implements ViewPager.OnPageChangeListener {
         initViews();
         initDots();
         SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
-        String isFirst = sharedPreferences.getString("isFirst","yes");
+        String isFirst = sharedPreferences.getString("isFirst","yes");  //当第一次使用的时候，isFirst默认为yes
         if(isFirst.equals("no")){
             Log.d("Guide","nonono");
             startActivity(new Intent(Guide.this,MainActivity.class));
@@ -45,9 +45,15 @@ public class Guide extends Activity implements ViewPager.OnPageChangeListener {
         }else{
             Log.d("Guide","First");
             SharedPreferences.Editor sp = getSharedPreferences("config", MODE_PRIVATE).edit();
-            sp.putString("isFirst","no");
+            sp.putString("isFirst","no");  //一旦访问一次后，isFirst就被设置为no,今后再进入app就不再弹出欢迎界面
             sp.commit();
         }
+        /*
+        SharedPreferences.Editor sp = getSharedPreferences("config", MODE_PRIVATE).edit();
+        sp.putString("isFirst","yes");
+        sp.commit();
+        */
+
         btn= (Button)views.get(2).findViewById(R.id.btn); //要加views.get(2)前缀是因为这个控件不在与当前活动绑定的布局文件中，否则虽然编译通过，但是运行起来要崩溃。可能因为这不是与activity通过setcontentview绑定的布局文件。
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
